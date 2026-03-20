@@ -2,25 +2,21 @@
 
 一个具有自动分类、记忆功能和智能行程规划的备忘录 Web 应用。
 
-## 项目位置
-
-```
-/Users/linshi/memo-app/index.html
-```
-
 ## 如何使用
+
+下载之后
 
 ### 方法一：直接打开
 
 在终端执行以下命令：
 
 ```bash
-open /Users/linshi/memo-app/index.html
+项目位置/index.html
 ```
 
-### 方法二：拖入浏览器
+### 方法二：将项目拖入浏览器
 
-用 Finder 打开 `/Users/linshi/memo-app/` 目录，将 `index.html` 文件拖入 Chrome/Safari/Edge 等浏览器。
+用 Finder 打开 `项目位置` 目录，将 `index.html` 文件拖入 Chrome/Safari/Edge 等浏览器。
 
 ## 功能介绍
 
