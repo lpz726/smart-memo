@@ -325,6 +325,131 @@
             background: #a8a8a8;
         }
 
+        /* 语音控制样式 */
+        .voice-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .voice-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .voice-btn.listening {
+            animation: pulse 1.5s ease-in-out infinite;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            50% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); }
+        }
+
+        .voice-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .voice-cmd-btn {
+            padding: 8px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .voice-cmd-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .voice-status {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .voice-status.show {
+            display: flex;
+        }
+
+        .voice-status.listening {
+            background: #fdeaea;
+            color: #e74c3c;
+        }
+
+        .voice-status.success {
+            background: #e8f8f5;
+            color: #2ecc71;
+        }
+
+        .voice-status i {
+            font-size: 1rem;
+        }
+
+        .voice-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .voice-input-row textarea {
+            flex: 1;
+        }
+
+        .voice-commands-panel {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .voice-commands-panel h4 {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .voice-commands-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+        .voice-commands-list span {
+            padding: 4px 8px;
+            background: white;
+            border-radius: 6px;
+        }
+
         /* 提示框 */
         .toast {
             position: fixed;
@@ -603,13 +728,49 @@
             <!-- 左侧面板 -->
             <aside class="sidebar">
                 <div class="input-area">
-                    <textarea id="memoInput" placeholder="输入你的备忘内容...&#10;&#10;示例：明天上午9点开会讨论项目进度"></textarea>
+                    <div class="voice-input-row">
+                        <textarea id="memoInput" placeholder="输入或语音输入备忘内容...&#10;&#10;示例：明天上午9点开会讨论项目进度"></textarea>
+                        <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceInput()" title="语音输入">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                    <div class="voice-status" id="voiceStatus">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                        <span id="voiceStatusText">正在聆听...</span>
+                    </div>
                     <div class="category-suggestion" id="categorySuggestion">
                         <span class="suggestion-label">AI 建议分类：</span>
                     </div>
                     <button class="btn btn-primary" onclick="addMemo()">
                         <i class="fas fa-plus"></i> 添加备忘录
                     </button>
+                    <div class="voice-toolbar">
+                        <button class="voice-cmd-btn" onclick="startVoiceCommand('添加')">
+                            <i class="fas fa-plus-circle"></i> 语音添加
+                        </button>
+                        <button class="voice-cmd-btn" onclick="startVoiceCommand('搜索')">
+                            <i class="fas fa-search"></i> 语音搜索
+                        </button>
+                        <button class="voice-cmd-btn" onclick="startVoiceCommand('删除')">
+                            <i class="fas fa-trash"></i> 语音删除
+                        </button>
+                        <button class="voice-cmd-btn" onclick="startVoiceCommand('行程')">
+                            <i class="fas fa-calendar"></i> 语音行程
+                        </button>
+                    </div>
+                    <div class="voice-commands-panel">
+                        <h4><i class="fas fa-info-circle"></i> 语音命令说明</h4>
+                        <div class="voice-commands-list">
+                            <span>添加 [内容]</span>
+                            <span>搜索 [关键词]</span>
+                            <span>删除最新</span>
+                            <span>删除全部</span>
+                            <span>工作/生活/学习...</span>
+                            <span>生成行程</span>
+                            <span>显示全部</span>
+                            <span>清除搜索</span>
+                        </div>
+                    </div>
                 </div>
 
                 <h3 style="margin-bottom: 15px; color: #333;">
@@ -1358,6 +1519,251 @@
         document.getElementById('memoInput').addEventListener('input', (e) => {
             showCategorySuggestions(e.target.value);
         });
+
+        // ==================== 语音控制功能 ====================
+        
+        // 检查浏览器是否支持语音识别
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isListening = false;
+        let currentVoiceMode = 'input'; // 'input', '添加', '搜索', '删除', '行程'
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'zh-CN';
+            recognition.continuous = false;
+            recognition.interimResults = true;
+
+            recognition.onstart = () => {
+                isListening = true;
+                document.getElementById('voiceBtn').classList.add('listening');
+                showVoiceStatus('正在聆听...', 'listening');
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                document.getElementById('voiceBtn').classList.remove('listening');
+                hideVoiceStatus();
+            };
+
+            recognition.onerror = (event) => {
+                isListening = false;
+                document.getElementById('voiceBtn').classList.remove('listening');
+                const errorMessages = {
+                    'no-speech': '未检测到语音，请重试',
+                    'audio-capture': '未找到麦克风，请检查设备',
+                    'not-allowed': '请允许使用麦克风权限',
+                    'network': '网络错误，请检查网络连接'
+                };
+                const msg = errorMessages[event.error] || '语音识别出错';
+                showToast(msg);
+                hideVoiceStatus();
+            };
+
+            recognition.onresult = (event) => {
+                let finalTranscript = '';
+                let interimTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                // 显示实时识别结果
+                if (interimTranscript) {
+                    showVoiceStatus(`识别中: ${interimTranscript}`, 'listening');
+                }
+
+                // 处理最终识别结果
+                if (finalTranscript) {
+                    processVoiceResult(finalTranscript.trim());
+                }
+            };
+        }
+
+        // 切换语音输入
+        function toggleVoiceInput() {
+            if (!SpeechRecognition) {
+                showToast('您的浏览器不支持语音识别，请使用 Chrome 或 Edge');
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+            } else {
+                currentVoiceMode = 'input';
+                recognition.start();
+            }
+        }
+
+        // 开始语音命令
+        function startVoiceCommand(mode) {
+            if (!SpeechRecognition) {
+                showToast('您的浏览器不支持语音识别，请使用 Chrome 或 Edge');
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+            }
+
+            currentVoiceMode = mode;
+            const modeNames = {
+                '添加': '请说出要添加的备忘内容',
+                '搜索': '请说出要搜索的关键词',
+                '删除': '请说出: 删除最新 / 删除全部',
+                '行程': '请说"生成行程"或指定日期'
+            };
+            showVoiceStatus(modeNames[mode], 'listening');
+            
+            setTimeout(() => {
+                recognition.start();
+            }, 300);
+        }
+
+        // 处理语音识别结果
+        function processVoiceResult(text) {
+            showVoiceStatus(`识别结果: ${text}`, 'success');
+
+            switch (currentVoiceMode) {
+                case 'input':
+                    // 直接填入输入框
+                    const input = document.getElementById('memoInput');
+                    input.value = text;
+                    showCategorySuggestions(text);
+                    showToast('语音已识别，请点击添加');
+                    break;
+
+                case '添加':
+                    // 直接添加备忘录
+                    document.getElementById('memoInput').value = text;
+                    addMemo();
+                    break;
+
+                case '搜索':
+                    // 执行搜索
+                    document.getElementById('searchInput').value = text;
+                    searchMemos();
+                    showToast(`正在搜索: ${text}`);
+                    break;
+
+                case '删除':
+                    // 处理删除命令
+                    handleDeleteCommand(text);
+                    break;
+
+                case '行程':
+                    // 处理行程命令
+                    handleScheduleCommand(text);
+                    break;
+            }
+
+            setTimeout(() => hideVoiceStatus(), 3000);
+        }
+
+        // 处理删除命令
+        function handleDeleteCommand(text) {
+            if (text.includes('最新') || text.includes('最近')) {
+                if (memos.length > 0) {
+                    deleteMemo(memos[0].id);
+                } else {
+                    showToast('没有可删除的备忘录');
+                }
+            } else if (text.includes('全部') || text.includes('所有') || text.includes('清空')) {
+                if (memos.length > 0 && confirm('确定要删除所有备忘录吗？')) {
+                    memos = [];
+                    saveMemos();
+                    renderMemos();
+                    updateStats();
+                    updateCategoryCounts();
+                    generateSchedule();
+                    showToast('已清空所有备忘录');
+                }
+            } else {
+                // 尝试根据内容匹配删除
+                const matched = memos.find(m => m.content.includes(text.replace('删除', '').trim()));
+                if (matched) {
+                    deleteMemo(matched.id);
+                } else {
+                    showToast('未找到匹配的备忘录，请说"删除最新"或"删除全部"');
+                }
+            }
+        }
+
+        // 处理行程命令
+        function handleScheduleCommand(text) {
+            if (text.includes('生成') || text.includes('行程') || text.includes('安排')) {
+                generateSchedule();
+                showToast('行程已生成');
+            } else if (text.includes('明天')) {
+                const date = new Date();
+                date.setDate(date.getDate() + 1);
+                document.getElementById('scheduleDate').value = date.toISOString().split('T')[0];
+                generateSchedule();
+                showToast('已生成明天的行程');
+            } else if (text.includes('后天')) {
+                const date = new Date();
+                date.setDate(date.getDate() + 2);
+                document.getElementById('scheduleDate').value = date.toISOString().split('T')[0];
+                generateSchedule();
+                showToast('已生成后天的行程');
+            } else {
+                generateSchedule();
+                showToast('行程已生成');
+            }
+        }
+
+        // 显示语音状态
+        function showVoiceStatus(text, type) {
+            const status = document.getElementById('voiceStatus');
+            const statusText = document.getElementById('voiceStatusText');
+            statusText.textContent = text;
+            status.className = `voice-status show ${type}`;
+        }
+
+        // 隐藏语音状态
+        function hideVoiceStatus() {
+            document.getElementById('voiceStatus').classList.remove('show');
+        }
+
+        // 添加全局语音命令监听（可随时说出分类名称切换）
+        const categoryKeywords = {
+            '工作': 'work',
+            '生活': 'life',
+            '学习': 'study',
+            '健康': 'health',
+            '购物': 'shopping',
+            '想法': 'idea',
+            '其他': 'other',
+            '全部': 'all',
+            '所有': 'all'
+        };
+
+        // 在输入模式下也支持快捷命令
+        function checkQuickCommand(text) {
+            // 检查是否是分类切换命令
+            for (const [keyword, category] of Object.entries(categoryKeywords)) {
+                if (text === keyword || text.includes(`显示${keyword}`) || text.includes(`查看${keyword}`)) {
+                    filterByCategory(category);
+                    showToast(`已切换到${keyword}分类`);
+                    return true;
+                }
+            }
+
+            // 清除搜索
+            if (text.includes('清除搜索') || text.includes('取消搜索') || text === '清除') {
+                document.getElementById('searchInput').value = '';
+                searchMemos();
+                showToast('已清除搜索');
+                return true;
+            }
+
+            return false;
+        }
 
         // 初始化
         initDatePicker();
